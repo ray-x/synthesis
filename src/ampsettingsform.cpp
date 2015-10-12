@@ -8,12 +8,114 @@
 #include <QKeyEvent>
 #include <QMouseEvent>
 #include <QScrollBar>
+//#include "gig.h"
+#include "gigfile.h"
+using namespace std;
+
+void AmpSettingsForm::show() 
+{
+    QWidget::show();
+    gigFile *gigFileObj= gigFile::instance();
+
+    gig::File *gigfd=gigFileObj->m_gigO[gigFileObj->idx];
+    gig::DimensionRegion *pDimensionRegion;
+    if (gigfd!=nullptr) {
+        gig::Instrument *pInstrument = gigfd->GetFirstInstrument();
+        gig::Region *pRegion=pInstrument->GetFirstRegion();
+        pDimensionRegion = pRegion->pDimensionRegions[0];
+    }else
+        pDimensionRegion=nullptr;
+
+    if (pDimensionRegion!=nullptr)
+    {
+         m_dsbGain->setValue(pDimensionRegion->Gain);
+         m_ckbGain6db->setChecked(pDimensionRegion->Gain);
+         m_sbPan->setValue(pDimensionRegion->Pan);
+         m_dsbPreAttackLevel->setValue(pDimensionRegion->EG1PreAttack);
+         m_dspAttackTime->setValue(pDimensionRegion->EG1Attack);
+         m_ckbHoldAttack->setChecked(pDimensionRegion->EG1Hold);
+         m_dspDecayTime1->setValue(pDimensionRegion->EG1Decay1);
+         m_dspDecayTime2->setValue(pDimensionRegion->EG1Decay2);
+         m_ckbInfiniteSustain->setChecked(pDimensionRegion->EG1InfiniteSustain);
+         m_dspSustainLevel->setValue(pDimensionRegion->EG1Sustain);
+         m_dspReleaseTime->setValue(pDimensionRegion->EG1Release);
+         int index;
+         switch (pDimensionRegion->EG1Controller.type)
+         {
+         case gig::leverage_ctrl_t::type_none:
+             index=0;
+             break;
+         case gig::leverage_ctrl_t::type_channelaftertouch:
+             index=1;
+             break;
+         case gig::leverage_ctrl_t::type_velocity:
+             index=2;
+             break;
+         case gig::leverage_ctrl_t::type_controlchange:
+             index=pDimensionRegion->EG1Controller.controller_number+3;
+             break;
+         default:
+             index=0;
+             break;
+         }
+         m_cbController->setCurrentIndex(index);
+         m_ckbControllerInvert->setChecked(pDimensionRegion->EG1ControllerInvert);
+         m_ckbControllerInvert->setChecked(pDimensionRegion->EG1ControllerInvert);
+         m_sbCtrlAttackInfluence->setValue(pDimensionRegion->EG1ControllerAttackInfluence);
+         m_sbCtrlDecayInfluence->setValue(pDimensionRegion->EG1ControllerDecayInfluence);
+         m_sbCtrlReleaseInfluence->setValue(pDimensionRegion->EG1ControllerReleaseInfluence);
+         switch (pDimensionRegion->EG2Controller.type)
+         {
+         case gig::leverage_ctrl_t::type_none:
+             index=0;
+             break;
+         case gig::leverage_ctrl_t::type_channelaftertouch:
+             index=1;
+             break;
+         case gig::leverage_ctrl_t::type_velocity:
+             index=2;
+             break;
+         case gig::leverage_ctrl_t::type_controlchange:
+             index=pDimensionRegion->EG2Controller.controller_number+3;
+             break;
+         default:
+             index=0;
+             break;
+         }
+         m_cbAttCtrl->setCurrentIndex(index);
+         m_ckbInvertAttCtrl->setChecked(pDimensionRegion->InvertAttenuationController);
+         m_sbAttCtrlThreshold->setValue(pDimensionRegion->AttenuationControllerThreshold);
+         m_sbInStart->setValue(pDimensionRegion->Crossfade.in_start );
+         m_sbInEnd->setValue(pDimensionRegion->Crossfade.in_end);
+         m_sbOutStart->setValue(pDimensionRegion->Crossfade.out_start);
+         m_sbOutEnd->setValue(pDimensionRegion->Crossfade.out_start);
+         m_sbInternalDepth->setValue(pDimensionRegion->LFO1InternalDepth);
+         m_sbControlDepth->setValue(pDimensionRegion->LFO1ControlDepth);
+         m_cbOscController->setCurrentIndex(pDimensionRegion->LFO1Controller);
+         m_ckbFlipPhase->setChecked(pDimensionRegion->LFO1FlipPhase);
+         m_ckbSync->setChecked(pDimensionRegion->LFO1Sync);
+    }
+
+}
+
 
 AmpSettingsForm::AmpSettingsForm(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::AmpSettingsForm)
 {
     ui->setupUi(this);
+
+
+    gigFile *gigFileObj= gigFile::instance();
+
+    gig::File *gigfd=gigFileObj->m_gigO[gigFileObj->idx];
+    gig::DimensionRegion *pDimensionRegion;
+    if (gigfd!=nullptr) {
+        gig::Instrument *pInstrument = gigfd->GetFirstInstrument();
+        gig::Region *pRegion=pInstrument->GetFirstRegion();
+        pDimensionRegion = pRegion->pDimensionRegions[gigFileObj->idx];
+    }else
+        pDimensionRegion=nullptr;
 
     isTabClicked = false;
 
@@ -24,9 +126,13 @@ AmpSettingsForm::AmpSettingsForm(QWidget *parent) :
     m_dsbGain->setAlignment(Qt::AlignHCenter);
     m_dsbGain->installEventFilter(this);
     m_dsbGain->children().at(0)->installEventFilter(this);
+    if (pDimensionRegion!=nullptr) m_dsbGain->setValue(pDimensionRegion->Gain);
+    connect(m_dsbGain, SIGNAL(valueChanged(double)), gigFileObj, SLOT(setGain(double)));
 
     m_ckbGain6db = new QCheckBox(this);
     m_ckbGain6db->installEventFilter(this);
+    if (pDimensionRegion!=nullptr) m_ckbGain6db->setChecked(pDimensionRegion->Gain);
+    connect(m_ckbGain6db, SIGNAL(stateChanged(int)), gigFileObj, SLOT(setGain6db(int)));
 
     m_sbPan = new QSpinBox(this);
     m_sbPan->setMaximum(63);
@@ -34,6 +140,8 @@ AmpSettingsForm::AmpSettingsForm(QWidget *parent) :
     m_sbPan->setAlignment(Qt::AlignHCenter);
     m_sbPan->installEventFilter(this);
     m_sbPan->children().at(0)->installEventFilter(this);
+    if (pDimensionRegion!=nullptr) m_sbPan->setValue(pDimensionRegion->Pan);
+    connect(m_sbPan, SIGNAL(valueChanged(int)), gigFileObj, SLOT(setPan(int)));
 
     m_dsbPreAttackLevel = new QDoubleSpinBox(this);
     m_dsbPreAttackLevel->setMaximum(100.00);
@@ -42,6 +150,8 @@ AmpSettingsForm::AmpSettingsForm(QWidget *parent) :
     m_dsbPreAttackLevel->setAlignment(Qt::AlignHCenter);
     m_dsbPreAttackLevel->installEventFilter(this);
     m_dsbPreAttackLevel->children().at(0)->installEventFilter(this);
+    if (pDimensionRegion!=nullptr) m_dsbPreAttackLevel->setValue(pDimensionRegion->EG1PreAttack);
+    connect(m_dsbPreAttackLevel, SIGNAL(valueChanged(double)), gigFileObj, SLOT(setPreAttackLevel(double)));
 
     m_dspAttackTime = new QDoubleSpinBox(this);
     m_dspAttackTime->setMaximum(60.000);
@@ -50,9 +160,13 @@ AmpSettingsForm::AmpSettingsForm(QWidget *parent) :
     m_dspAttackTime->setAlignment(Qt::AlignHCenter);
     m_dspAttackTime->installEventFilter(this);
     m_dspAttackTime->children().at(0)->installEventFilter(this);
+    if (pDimensionRegion!=nullptr) m_dspAttackTime->setValue(pDimensionRegion->EG1Attack);
+    connect(m_dspAttackTime, SIGNAL(valueChanged(double)), gigFileObj, SLOT(setAttackTime(double)));
 
     m_ckbHoldAttack = new QCheckBox(this);
     m_ckbHoldAttack->installEventFilter(this);
+    if (pDimensionRegion!=nullptr) m_ckbHoldAttack->setChecked(pDimensionRegion->EG1Hold);
+    connect(m_ckbHoldAttack, SIGNAL(stateChanged(int)), gigFileObj, SLOT(setHoldAttack(int)));
 
     m_dspDecayTime1 = new QDoubleSpinBox(this);
     m_dspDecayTime1->setMaximum(60.000);
@@ -61,6 +175,8 @@ AmpSettingsForm::AmpSettingsForm(QWidget *parent) :
     m_dspDecayTime1->setAlignment(Qt::AlignHCenter);
     m_dspDecayTime1->installEventFilter(this);
     m_dspDecayTime1->children().at(0)->installEventFilter(this);
+    if (pDimensionRegion!=nullptr) m_dspDecayTime1->setValue(pDimensionRegion->EG1Decay1);
+    connect(m_dspDecayTime1, SIGNAL(valueChanged(double)), gigFileObj, SLOT(setDecayTime1(double)));
 
     m_dspDecayTime2 = new QDoubleSpinBox(this);
     m_dspDecayTime2->setMaximum(60.000);
@@ -69,9 +185,13 @@ AmpSettingsForm::AmpSettingsForm(QWidget *parent) :
     m_dspDecayTime2->setAlignment(Qt::AlignHCenter);
     m_dspDecayTime2->installEventFilter(this);
     m_dspDecayTime2->children().at(0)->installEventFilter(this);
+    if (pDimensionRegion!=nullptr) m_dspDecayTime2->setValue(pDimensionRegion->EG1Decay2);
+    connect(m_dspDecayTime2, SIGNAL(valueChanged(double)), gigFileObj, SLOT(setDecayTime2(double)));
 
     m_ckbInfiniteSustain = new QCheckBox(this);
     m_ckbInfiniteSustain->installEventFilter(this);
+    if (pDimensionRegion!=nullptr) m_ckbInfiniteSustain->setChecked(pDimensionRegion->EG1InfiniteSustain);
+    connect(m_ckbInfiniteSustain, SIGNAL(stateChanged(int)), gigFileObj, SLOT(setInfiniteSustain(int)));
 
     m_dspSustainLevel = new QDoubleSpinBox(this);
     m_dspSustainLevel->setMaximum(100.00);
@@ -80,6 +200,8 @@ AmpSettingsForm::AmpSettingsForm(QWidget *parent) :
     m_dspSustainLevel->setAlignment(Qt::AlignHCenter);
     m_dspSustainLevel->installEventFilter(this);
     m_dspSustainLevel->children().at(0)->installEventFilter(this);
+    if (pDimensionRegion!=nullptr) m_dspSustainLevel->setValue(pDimensionRegion->EG1Sustain);
+    connect(m_dspSustainLevel, SIGNAL(valueChanged(double)), gigFileObj, SLOT(setSustainLevel(double)));
 
     m_dspReleaseTime = new QDoubleSpinBox(this);
     m_dspReleaseTime->setMaximum(60.000);
@@ -88,6 +210,8 @@ AmpSettingsForm::AmpSettingsForm(QWidget *parent) :
     m_dspReleaseTime->setAlignment(Qt::AlignHCenter);
     m_dspReleaseTime->installEventFilter(this);
     m_dspReleaseTime->children().at(0)->installEventFilter(this);
+    if (pDimensionRegion!=nullptr) m_dspReleaseTime->setValue(pDimensionRegion->EG1Release);
+    connect(m_dspReleaseTime, SIGNAL(valueChanged(double)), gigFileObj, SLOT(setReleaseTime(double)));
 
     m_cbController = new QComboBox(this);
     m_cbController->addItem("None");
@@ -98,6 +222,7 @@ AmpSettingsForm::AmpSettingsForm(QWidget *parent) :
     m_cbController->addItem("CC3: Undefined [EXT]");
     m_cbController->addItem("CC4: Foot");
     m_cbController->addItem("CC5: Portamentotime");
+
     m_cbController->addItem("CC6: Data Entry MSB");
     m_cbController->addItem("CC7: Volume [EXT]");
     m_cbController->addItem("CC8: Balance [EXT]");
@@ -106,10 +231,21 @@ AmpSettingsForm::AmpSettingsForm(QWidget *parent) :
     m_cbController->addItem("CC11: Expression [EXT]");
     m_cbController->addItem("CC12: Effect 1");
     m_cbController->addItem("CC13: Effect 2");
+
     m_cbController->installEventFilter(this);
+    //FIXME:
+    //m_cbController->setCurrentIndex(pDimensionRegion->EG1Controller);
+    if (pDimensionRegion!=nullptr) m_cbController->setCurrentIndex(1);
+    connect(m_cbController, SIGNAL(currentIndexChanged(int)), gigFileObj, SLOT(setEG1Controller(int)));
 
     m_ckbControllerInvert = new QCheckBox(this);
     m_ckbControllerInvert->installEventFilter(this);
+    if (pDimensionRegion!=nullptr) m_ckbControllerInvert->setChecked(pDimensionRegion->EG1ControllerInvert);
+    connect(m_ckbControllerInvert, SIGNAL(stateChanged(int)), gigFileObj, SLOT(setEG1Controller(int)));
+/*
+    if (pDimensionRegion!=nullptr) m_ckbControllerInvert->setChecked(pDimensionRegion->EG1ControllerInvert);
+    connect(m_dsbPreAttackLevel, SIGNAL(valueChanged(int)), gigFileObj, SLOT(setControllerInvert(int)));
+*/
 
     m_sbCtrlAttackInfluence = new QSpinBox(this);
     m_sbCtrlAttackInfluence->setMaximum(3);
@@ -117,6 +253,8 @@ AmpSettingsForm::AmpSettingsForm(QWidget *parent) :
     m_sbCtrlAttackInfluence->setAlignment(Qt::AlignHCenter);
     m_sbCtrlAttackInfluence->installEventFilter(this);
     m_sbCtrlAttackInfluence->children().at(0)->installEventFilter(this);
+    if (pDimensionRegion!=nullptr) m_sbCtrlAttackInfluence->setValue(pDimensionRegion->EG1ControllerAttackInfluence);
+    connect(m_sbCtrlAttackInfluence, SIGNAL(valueChanged(int)), gigFileObj, SLOT(setCtrlAttackInfluence(int)));
 
     m_sbCtrlDecayInfluence = new QSpinBox(this);
     m_sbCtrlDecayInfluence->setMaximum(3);
@@ -124,6 +262,8 @@ AmpSettingsForm::AmpSettingsForm(QWidget *parent) :
     m_sbCtrlDecayInfluence->setAlignment(Qt::AlignHCenter);
     m_sbCtrlDecayInfluence->installEventFilter(this);
     m_sbCtrlDecayInfluence->children().at(0)->installEventFilter(this);
+    if (pDimensionRegion!=nullptr) m_sbCtrlDecayInfluence->setValue(pDimensionRegion->EG1ControllerDecayInfluence);
+    connect(m_sbCtrlDecayInfluence, SIGNAL(valueChanged(int)), gigFileObj, SLOT(setCtrlDecayInfluence(int)));
 
     m_sbCtrlReleaseInfluence = new QSpinBox(this);
     m_sbCtrlReleaseInfluence->setMaximum(3);
@@ -131,6 +271,8 @@ AmpSettingsForm::AmpSettingsForm(QWidget *parent) :
     m_sbCtrlReleaseInfluence->setAlignment(Qt::AlignHCenter);
     m_sbCtrlReleaseInfluence->installEventFilter(this);
     m_sbCtrlReleaseInfluence->children().at(0)->installEventFilter(this);
+    if (pDimensionRegion!=nullptr) m_sbCtrlReleaseInfluence->setValue(pDimensionRegion->EG1ControllerReleaseInfluence);
+    connect(m_sbCtrlReleaseInfluence, SIGNAL(valueChanged(int)), gigFileObj, SLOT(setCtrlReleaseInfluence(int)));
 
 
     m_cbAttCtrl = new QComboBox(this);
@@ -147,9 +289,15 @@ AmpSettingsForm::AmpSettingsForm(QWidget *parent) :
     m_cbAttCtrl->addItem("CC8: Balance");
     m_cbAttCtrl->addItem("CC9: Undefined");
     m_cbAttCtrl->installEventFilter(this);
+    //FIXME:
+    //m_cbController->setCurrentIndex(pDimensionRegion->EG1Controller);
+    if (pDimensionRegion!=nullptr) m_cbAttCtrl->setCurrentIndex(1);
+    connect(m_cbAttCtrl, SIGNAL(currentIndexChanged(int)), gigFileObj, SLOT(setEG2Controller(int)));
 
     m_ckbInvertAttCtrl = new QCheckBox(this);
     m_ckbInvertAttCtrl->installEventFilter(this);
+    if (pDimensionRegion!=nullptr) m_ckbInvertAttCtrl->setChecked(pDimensionRegion->InvertAttenuationController);
+    connect(m_ckbInvertAttCtrl, SIGNAL(stateChanged(int)), gigFileObj, SLOT(setInvertAttCtrl(int)));
 
     m_sbAttCtrlThreshold = new QSpinBox(this);
     m_sbAttCtrlThreshold->setMaximum(127);
@@ -157,6 +305,8 @@ AmpSettingsForm::AmpSettingsForm(QWidget *parent) :
     m_sbAttCtrlThreshold->setAlignment(Qt::AlignHCenter);
     m_sbAttCtrlThreshold->installEventFilter(this);
     m_sbAttCtrlThreshold->children().at(0)->installEventFilter(this);
+    if (pDimensionRegion!=nullptr) if (pDimensionRegion!=nullptr) m_sbAttCtrlThreshold->setValue(pDimensionRegion->AttenuationControllerThreshold);
+    connect(m_sbAttCtrlThreshold, SIGNAL(valueChanged(int)), gigFileObj, SLOT(setAttCtrlThreshold(int)));
 
     m_sbInStart = new QSpinBox(this);
     m_sbInStart->setMaximum(127);
@@ -164,6 +314,8 @@ AmpSettingsForm::AmpSettingsForm(QWidget *parent) :
     m_sbInStart->setAlignment(Qt::AlignHCenter);
     m_sbInStart->installEventFilter(this);
     m_sbInStart->children().at(0)->installEventFilter(this);
+    if (pDimensionRegion!=nullptr) m_sbInStart->setValue(pDimensionRegion->Crossfade.in_start );
+    connect(m_sbInStart, SIGNAL(valueChanged(int)), gigFileObj, SLOT(setCrossfadeInStart(int)));
 
     m_sbInEnd = new QSpinBox(this);
     m_sbInEnd->setMaximum(127);
@@ -171,6 +323,8 @@ AmpSettingsForm::AmpSettingsForm(QWidget *parent) :
     m_sbInEnd->setAlignment(Qt::AlignHCenter);
     m_sbInEnd->installEventFilter(this);
     m_sbInEnd->children().at(0)->installEventFilter(this);
+    if (pDimensionRegion!=nullptr) m_sbInEnd->setValue(pDimensionRegion->Crossfade.in_end);
+    connect(m_sbInEnd, SIGNAL(valueChanged(int)), gigFileObj, SLOT(setCrossfadeInEnd(int)));
 
     m_sbOutStart = new QSpinBox(this);
     m_sbOutStart->setMaximum(127);
@@ -178,6 +332,8 @@ AmpSettingsForm::AmpSettingsForm(QWidget *parent) :
     m_sbOutStart->setAlignment(Qt::AlignHCenter);
     m_sbOutStart->installEventFilter(this);
     m_sbOutStart->children().at(0)->installEventFilter(this);
+    if (pDimensionRegion!=nullptr) m_sbOutStart->setValue(pDimensionRegion->Crossfade.out_start);
+    connect(m_sbOutStart, SIGNAL(valueChanged(int)), gigFileObj, SLOT(setCrossfadeOutStart(int)));
 
     m_sbOutEnd = new QSpinBox(this);
     m_sbOutEnd->setMaximum(127);
@@ -185,6 +341,8 @@ AmpSettingsForm::AmpSettingsForm(QWidget *parent) :
     m_sbOutEnd->setAlignment(Qt::AlignHCenter);
     m_sbOutEnd->installEventFilter(this);
     m_sbOutEnd->children().at(0)->installEventFilter(this);
+    if (pDimensionRegion!=nullptr) m_sbOutEnd->setValue(pDimensionRegion->Crossfade.out_start);
+    connect(m_sbOutEnd, SIGNAL(valueChanged(int)), gigFileObj, SLOT(setCrossfadeOutEnd(int)));
 
     m_dsbFrequency = new QDoubleSpinBox(this);
     m_dsbFrequency->setMaximum(10.00);
@@ -193,6 +351,8 @@ AmpSettingsForm::AmpSettingsForm(QWidget *parent) :
     m_dsbFrequency->setAlignment(Qt::AlignHCenter);
     m_dsbFrequency->installEventFilter(this);
     m_dsbFrequency->children().at(0)->installEventFilter(this);
+    if (pDimensionRegion!=nullptr) m_sbInStart->setValue(pDimensionRegion->LFO1Frequency);
+    connect(m_dsbFrequency, SIGNAL(valueChanged(double)), gigFileObj, SLOT(setFrequency(double)));
 
     m_sbInternalDepth = new QSpinBox(this);
     m_sbInternalDepth->setMaximum(1200);
@@ -200,6 +360,8 @@ AmpSettingsForm::AmpSettingsForm(QWidget *parent) :
     m_sbInternalDepth->setAlignment(Qt::AlignHCenter);
     m_sbInternalDepth->installEventFilter(this);
     m_sbInternalDepth->children().at(0)->installEventFilter(this);
+    if (pDimensionRegion!=nullptr) m_sbInternalDepth->setValue(pDimensionRegion->LFO1InternalDepth);
+    connect(m_sbInternalDepth, SIGNAL(valueChanged(int)), gigFileObj, SLOT(setInternalDepth(int)));
 
     m_sbControlDepth = new QSpinBox(this);
     m_sbControlDepth->setMaximum(1200);
@@ -207,6 +369,8 @@ AmpSettingsForm::AmpSettingsForm(QWidget *parent) :
     m_sbControlDepth->setAlignment(Qt::AlignHCenter);
     m_sbControlDepth->installEventFilter(this);
     m_sbControlDepth->children().at(0)->installEventFilter(this);
+    if (pDimensionRegion!=nullptr) m_sbControlDepth->setValue(pDimensionRegion->LFO1ControlDepth);
+    connect(m_sbControlDepth, SIGNAL(valueChanged(int)), gigFileObj, SLOT(setControlDepth(int)));
 
     m_cbOscController = new QComboBox(this);
     m_cbOscController->addItem("Internal");
@@ -215,11 +379,18 @@ AmpSettingsForm::AmpSettingsForm(QWidget *parent) :
     m_cbOscController->addItem("Internal+Modwheel");
     m_cbOscController->addItem("Internal+Aftertouch");
     m_cbOscController->installEventFilter(this);
+    if (pDimensionRegion!=nullptr) m_cbOscController->setCurrentIndex(pDimensionRegion->LFO1Controller);
+    connect(m_cbOscController, SIGNAL(currentIndexChanged(int)), gigFileObj, SLOT(setOscController(int)));
 
     m_ckbFlipPhase = new QCheckBox(this);
     m_ckbFlipPhase->installEventFilter(this);
+    if (pDimensionRegion!=nullptr) m_ckbFlipPhase->setChecked(pDimensionRegion->LFO1FlipPhase);
+    connect(m_ckbFlipPhase, SIGNAL(stateChanged(int)), gigFileObj, SLOT(setFlipPhase(int)));
+
     m_ckbSync = new QCheckBox(this);
     m_ckbSync->installEventFilter(this);
+    if (pDimensionRegion!=nullptr) m_ckbSync->setChecked(pDimensionRegion->LFO1Sync);
+    connect(m_ckbSync, SIGNAL(stateChanged(int)), gigFileObj, SLOT(setSync(int)));
 
     // add widgets to table widget
     ui->twAmplitudeBasic->verticalHeader()->setSectionResizeMode(QHeaderView::Fixed);

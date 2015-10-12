@@ -8,6 +8,63 @@
 #include <QKeyEvent>
 #include <QMouseEvent>
 #include <QScrollBar>
+#include "gigfile.h"
+
+
+void MiscSettingsForm::show()
+{
+    gigFile *gigFileObj= gigFile::instance();
+
+    gig::File *gigfd=gigFileObj->m_gigO[gigFileObj->idx];
+    gig::DimensionRegion *pDimensionRegion;
+    if (gigfd!=nullptr) {
+        gig::Instrument *pInstrument = gigfd->GetFirstInstrument();
+        gig::Region *pRegion=pInstrument->GetFirstRegion();
+        pDimensionRegion = pRegion->pDimensionRegions[0];
+    }else
+        pDimensionRegion=nullptr;
+
+    int index;
+
+    if (pDimensionRegion==nullptr) 
+        goto end;
+
+    switch (pDimensionRegion->VelocityResponseCurve) {
+        case gig::curve_type_nonlinear : index=0; break;
+        case gig::curve_type_linear : index=1; break;
+        case gig::curve_type_special : index=2; break;
+        default:index=0;
+    }
+
+    m_cbVelRespCurve->setCurrentIndex(index);
+
+
+    switch (pDimensionRegion->ReleaseVelocityResponseCurve) {
+        case gig::curve_type_nonlinear : index=0; break;
+        case gig::curve_type_linear : index=1; break;
+        case gig::curve_type_special : index=2; break;
+        default:index=0;
+    }
+
+   switch (pDimensionRegion->ReleaseVelocityResponseCurve) {
+       case gig::dim_bypass_ctrl_none : index=0; break;
+       case gig::dim_bypass_ctrl_94 : index=1; break;
+       case gig::dim_bypass_ctrl_95 : index=2; break;
+       default:index=0;
+    }
+    m_cbDimBaypass->setCurrentIndex(pDimensionRegion->DimensionBypass);
+    m_sbVelRespDepth->setValue(pDimensionRegion->ReleaseVelocityResponseDepth);
+    m_sbVelRespCurveScaling->setValue(pDimensionRegion->VelocityResponseCurveScaling);
+    m_sbRelVelRespDepth->setValue(pDimensionRegion->ReleaseVelocityResponseDepth);
+    m_sbRelTrigDecay->setValue(pDimensionRegion->ReleaseTriggerDecay);
+    m_chkSelfMask->setChecked(pDimensionRegion->SelfMask);
+    m_chkSustainDefeat->setChecked(pDimensionRegion->SustainDefeat);
+    m_chkDecode->setChecked(pDimensionRegion->MSDecode);
+    
+end:
+    QWidget::show();
+}
+
 
 MiscSettingsForm::MiscSettingsForm(QWidget *parent) :
     QWidget(parent),
@@ -15,23 +72,39 @@ MiscSettingsForm::MiscSettingsForm(QWidget *parent) :
 {
     ui->setupUi(this);
 
+    gigFile *gigFileObj= gigFile::instance();
+    //fixme::idx=1
+    int idx=1;
+    gig::File *gigfd=gigFileObj->m_gigO[idx];
+    gig::Instrument* pInstrument ;//= gigfd->GetFirstInstrument();
+    gig::Region *pRegion;//=pInstrument->GetFirstRegion();
+    gig::DimensionRegion* pDimensionRegion=nullptr;
+    //pDimensionRegion = pRegion->pDimensionRegions[idx];
+
+
     m_cbVelRespCurve          = new QComboBox(this);
     m_cbVelRespCurve->addItem("Nonlinear");
     m_cbVelRespCurve->addItem("Linear");
     m_cbVelRespCurve->addItem("Special");
     m_cbVelRespCurve->installEventFilter(this);
+    if (pDimensionRegion!=nullptr) m_cbVelRespCurve->setCurrentIndex(pDimensionRegion->VelocityResponseCurve);
+    connect(m_cbVelRespCurve, SIGNAL(currentIndexChanged(int)), gigFileObj, SLOT(SetVelocityResponseCurvef(int)));
 
     m_cbRelVelRespCurve       = new QComboBox(this);
     m_cbRelVelRespCurve->addItem("Nonlinear");
     m_cbRelVelRespCurve->addItem("Linear");
     m_cbRelVelRespCurve->addItem("Special");
     m_cbRelVelRespCurve->installEventFilter(this);
+    if (pDimensionRegion!=nullptr) m_cbRelVelRespCurve->setCurrentIndex(pDimensionRegion->ReleaseVelocityResponseCurve);
+    connect(m_cbRelVelRespCurve, SIGNAL(currentIndexChanged(int)), gigFileObj, SLOT(SetReleaseVelocityResponseCurvef(int)));
 
     m_cbDimBaypass            = new QComboBox(this);
     m_cbDimBaypass->addItem("None");
     m_cbDimBaypass->addItem("Effect4Depth");
     m_cbDimBaypass->addItem("Effect5Depth");
     m_cbDimBaypass->installEventFilter(this);
+    if (pDimensionRegion!=nullptr) m_cbDimBaypass->setCurrentIndex(pDimensionRegion->DimensionBypass);
+    connect(m_cbDimBaypass, SIGNAL(currentIndexChanged(int)), gigFileObj, SLOT(SetDimensionBypass(int)));
 
     m_sbVelRespDepth          = new QSpinBox(this);
     m_sbVelRespDepth->setMaximum(4);
@@ -39,6 +112,8 @@ MiscSettingsForm::MiscSettingsForm(QWidget *parent) :
     m_sbVelRespDepth->setAlignment(Qt::AlignHCenter);
     m_sbVelRespDepth->installEventFilter(this);
     m_sbVelRespDepth->children().at(0)->installEventFilter(this);
+    if (pDimensionRegion!=nullptr) m_sbVelRespDepth->setValue(pDimensionRegion->ReleaseVelocityResponseDepth);
+    connect(m_sbVelRespDepth, SIGNAL(valueChanged(int)), gigFileObj, SLOT(SetReleaseVelocityResponseDepthf(int)));
 
     m_sbVelRespCurveScaling   = new QSpinBox(this);
     m_sbVelRespCurveScaling->setMaximum(127);
@@ -46,6 +121,9 @@ MiscSettingsForm::MiscSettingsForm(QWidget *parent) :
     m_sbVelRespCurveScaling->setAlignment(Qt::AlignHCenter);
     m_sbVelRespCurveScaling->installEventFilter(this);
     m_sbVelRespCurveScaling->children().at(0)->installEventFilter(this);
+    if (pDimensionRegion!=nullptr) m_sbVelRespCurveScaling->setValue(pDimensionRegion->VelocityResponseCurveScaling);
+    connect(m_sbVelRespCurveScaling, SIGNAL(valueChanged(int)), gigFileObj, SLOT(SetVelocityResponseCurveScalingf(int)));
+
 
     m_sbRelVelRespDepth      = new QSpinBox(this);
     m_sbRelVelRespDepth->setMaximum(4);
@@ -53,7 +131,8 @@ MiscSettingsForm::MiscSettingsForm(QWidget *parent) :
     m_sbRelVelRespDepth->setAlignment(Qt::AlignHCenter);
     m_sbRelVelRespDepth->installEventFilter(this);
     m_sbRelVelRespDepth->children().at(0)->installEventFilter(this);
-
+    if (pDimensionRegion!=nullptr) m_sbRelVelRespDepth->setValue(pDimensionRegion->ReleaseVelocityResponseDepth);
+    connect(m_sbRelVelRespDepth, SIGNAL(valueChanged(int)), gigFileObj, SLOT(SetReleaseVelocityResponseDepthf(int)));
 
     m_sbRelTrigDecay          = new QSpinBox(this);
     m_sbRelTrigDecay->setMaximum(8);
@@ -61,13 +140,25 @@ MiscSettingsForm::MiscSettingsForm(QWidget *parent) :
     m_sbRelTrigDecay->setAlignment(Qt::AlignHCenter);
     m_sbRelTrigDecay->installEventFilter(this);
     m_sbRelTrigDecay->children().at(0)->installEventFilter(this);
+    if (pDimensionRegion!=nullptr) m_sbRelTrigDecay->setValue(pDimensionRegion->ReleaseTriggerDecay);
+    connect(m_sbRelTrigDecay, SIGNAL(valueChanged(int)), gigFileObj, SLOT(setReleaseTriggerDecay(int)));
 
     m_chkSelfMask             = new QCheckBox(this);
     m_chkSelfMask->installEventFilter(this);
+    if (pDimensionRegion!=nullptr) m_chkSelfMask->setChecked(pDimensionRegion->SelfMask);
+    connect(m_chkSelfMask, SIGNAL(stateChanged(int)), gigFileObj, SLOT(setSelfMask(int)));
+
     m_chkSustainDefeat        = new QCheckBox(this);
     m_chkSustainDefeat->installEventFilter(this);
+    if (pDimensionRegion!=nullptr) m_chkSustainDefeat->setChecked(pDimensionRegion->SustainDefeat);
+    connect(m_chkSustainDefeat, SIGNAL(stateChanged(int)), gigFileObj, SLOT(setSustainDefeat(int)));
+
+
     m_chkDecode               = new QCheckBox(this);
     m_chkDecode->installEventFilter(this);
+    if (pDimensionRegion!=nullptr) m_chkDecode->setChecked(pDimensionRegion->MSDecode);
+    connect(m_chkDecode, SIGNAL(stateChanged(int)), gigFileObj, SLOT(setMSDecode(int)));
+
 
     ui->twVelocityRespCurve->verticalHeader()->setSectionResizeMode(QHeaderView::Fixed);
     ui->twVelocityRespCurve->setSelectionBehavior(QAbstractItemView::SelectRows);

@@ -5,12 +5,42 @@
 #include <QGraphicsScene>
 #include <QGraphicsItem>
 #include <QDebug>
+#include <gigfile.h>
 
 PresetBankForm::PresetBankForm(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::PresetBankForm)
 {
     ui->setupUi(this);
+
+    gigFile *gigFileObj= gigFile::instance();
+
+    pbSample[0]=ui->pbSample1;
+    pbSample[1]=ui->pbSample2;
+    pbSample[2]=ui->pbSample3;
+    pbSample[3]=ui->pbSample4;
+
+    pbSampleEdit[0]=ui->pbSampleEdit1;
+    pbSampleEdit[1]=ui->pbSampleEdit2;
+    pbSampleEdit[2]=ui->pbSampleEdit3;
+    pbSampleEdit[3]=ui->pbSampleEdit4;
+
+    ui->setupUi(this);
+    for (int idx=0;idx<4;idx++) {
+
+        gig::File *gigfd = gigFileObj->m_gigO[idx];
+        if (gigfd) {
+            gig::Instrument *pInstrument = gigfd->GetFirstInstrument();
+            gig::Region *pRegion=pInstrument->GetFirstRegion();
+            gig::DimensionRegion* pDimensionRegion=pRegion->pDimensionRegions[idx];     
+            pbSample[idx]->setText(QString::fromStdString(gigfd->pInfo->Name));
+            pbSampleEdit[idx]->setEnabled(true);
+        }else{
+            pbSample[idx]->setText("EMPTY");
+            pbSampleEdit[idx]->setEnabled(false);
+        }
+    }
+
 
     ui->wgDimension1->setHandleColor(qRgb(16, 97, 114));
     ui->wgDimension2->setHandleColor(qRgb(16, 97, 114));
@@ -53,6 +83,7 @@ PresetBankForm::~PresetBankForm()
 
 void PresetBankForm::resizeEvent(QResizeEvent *)
 {
+    gigFile *gigFileObj= gigFile::instance();
     m_adsrGraph1->setScale(0.17);
     m_adsrGraph1->setX(-49);
     m_adsrGraph1->setY(-19);
@@ -72,6 +103,11 @@ void PresetBankForm::resizeEvent(QResizeEvent *)
     m_adsrGraph4->setX(-49);
     m_adsrGraph4->setY(-19);
     m_adsrGraph4->reset();
+	
+    ui->pbSample1->setText(gigFileObj->m_gigName[0]);
+    ui->pbSample2->setText(gigFileObj->m_gigName[1]);
+    ui->pbSample3->setText(gigFileObj->m_gigName[2]);
+    ui->pbSample4->setText(gigFileObj->m_gigName[3]);
 
     connect(ui->pbSample1,SIGNAL(clicked()),this,SLOT(setSampleButtonClicked()));
     connect(ui->pbSample2,SIGNAL(clicked()),this,SLOT(setSampleButtonClicked()));
@@ -79,9 +115,21 @@ void PresetBankForm::resizeEvent(QResizeEvent *)
     connect(ui->pbSample4,SIGNAL(clicked()),this,SLOT(setSampleButtonClicked()));
 }
 
+
+
 void PresetBankForm::setSampleButtonClicked()
 {
+    gigFile *gigFileObj= gigFile::instance();
     m_sampleButtonClicked = static_cast<QPushButton*>(sender());
+    if (m_sampleButtonClicked->text()==ui->pbSample1->text())
+        gigFileObj->idx=0;
+    else if  (m_sampleButtonClicked->text()==ui->pbSample2->text())
+        gigFileObj->idx=1;
+    else if  (m_sampleButtonClicked->text()==ui->pbSample3->text())
+        gigFileObj->idx=2;
+    else if  (m_sampleButtonClicked->text()==ui->pbSample4->text())
+        gigFileObj->idx=3;
+
 }
 
 void PresetBankForm::modifySampleButtonText(QString text)

@@ -23,7 +23,8 @@ public:
 
     void clearTableSelection();
     bool eventFilter(QObject *obj, QEvent *event);
-
+public slots:
+	void show();
 protected:
 
 private:

@@ -19,7 +19,8 @@ public:
     ~MiscSettingsForm();
 
     bool eventFilter(QObject *obj, QEvent *event);
-
+public slots:
+    void show();
 private:
     Ui::MiscSettingsForm *ui;
 

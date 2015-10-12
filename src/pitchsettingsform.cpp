@@ -8,22 +8,73 @@
 #include <QKeyEvent>
 #include <QMouseEvent>
 #include <QScrollBar>
+#include "gigfile.h"
+void PitchSettingsForm::show()
+{
+    gigFile *gigFileObj= gigFile::instance();
 
+    gig::File *gigfd=gigFileObj->m_gigO[gigFileObj->idx];
+    gig::DimensionRegion *pDimensionRegion;
+    if (gigfd!=nullptr) {
+        gig::Instrument *pInstrument = gigfd->GetFirstInstrument();
+        gig::Region *pRegion=pInstrument->GetFirstRegion();
+        pDimensionRegion = pRegion->pDimensionRegions[0];
+    }else {   
+        pDimensionRegion=nullptr;
+        goto end;
+    }
+
+    int index;
+    if (pDimensionRegion==nullptr)
+        goto end;
+    m_sbFineTune->setValue(pDimensionRegion->FineTune);
+    m_ckbPitchTrack->setChecked(pDimensionRegion->PitchTrack);
+    m_dsbAttack->setValue(pDimensionRegion->PitchTrack);
+    m_spDepth->setValue(pDimensionRegion->EG3Depth);
+    m_dsbFrequency->setValue(pDimensionRegion->LFO3Frequency);
+    switch (pDimensionRegion->VCFType) {
+        case gig::vcf_type_lowpass:index=0;break;
+        case gig::vcf_type_lowpassturbo:index=1;break;
+        case gig::vcf_type_bandpass:index=2;break;
+        case gig::vcf_type_highpass:index=3;break;
+        case gig::vcf_type_bandreject:index=4;break;
+    }
+    m_cbController->setCurrentIndex(index);
+    m_ckbSync->setChecked(pDimensionRegion->LFO3Sync);
+
+
+end:
+    QWidget::show();
+}
 PitchSettingsForm::PitchSettingsForm(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::PitchSettingsForm)
 {
     ui->setupUi(this);
 
+    gigFile *gigFileObj= gigFile::instance();
+    //fixme::idx=1
+    int idx=1;
+    gig::File *gigfd=gigFileObj->m_gigO[idx];
+    gig::Instrument* pInstrument; //= gigfd->GetFirstInstrument();
+    gig::Region *pRegion;//=pInstrument->GetFirstRegion();
+    gig::DimensionRegion* pDimensionRegion=nullptr;
+    pDimensionRegion =nullptr;// pRegion->pDimensionRegions[idx];
+
     m_sbFineTune = new QSpinBox(this);
     m_sbFineTune->setMaximum(50);
     m_sbFineTune->setMinimum(-49);
     m_sbFineTune->setAlignment(Qt::AlignHCenter);
     m_sbFineTune->installEventFilter(this);
+    if (pDimensionRegion!=nullptr) m_sbFineTune->setValue(pDimensionRegion->FineTune);
     m_sbFineTune->children().at(0)->installEventFilter(this);
+    connect(m_sbFineTune, SIGNAL(valueChanged(int)), gigFileObj, SLOT(setFineTune(int)));
+
 
     m_ckbPitchTrack = new QCheckBox(this);
     m_ckbPitchTrack->installEventFilter(this);
+    if (pDimensionRegion!=nullptr) m_ckbPitchTrack->setChecked(pDimensionRegion->PitchTrack);
+    connect(m_ckbPitchTrack, SIGNAL(stateChanged(int)), gigFileObj, SLOT(setPitchTrack(int)));
 
     m_dsbAttack = new QDoubleSpinBox(this);
     m_dsbAttack->setMaximum(10.000);
@@ -32,13 +83,18 @@ PitchSettingsForm::PitchSettingsForm(QWidget *parent) :
     m_dsbAttack->setAlignment(Qt::AlignHCenter);
     m_dsbAttack->installEventFilter(this);
     m_dsbAttack->children().at(0)->installEventFilter(this);
+    if (pDimensionRegion!=nullptr) m_dsbAttack->setValue(pDimensionRegion->PitchTrack);
+    connect(m_dsbAttack, SIGNAL(valueChanged(double)), gigFileObj, SLOT(setEG3Attack(double)));
 
     m_spDepth = new QSpinBox(this);
     m_spDepth->setMaximum(1200);
     m_spDepth->setMinimum(-1200);
     m_spDepth->setAlignment(Qt::AlignHCenter);
     m_spDepth->installEventFilter(this);
+    if (pDimensionRegion!=nullptr)  m_spDepth->setValue(pDimensionRegion->EG3Depth);
     m_spDepth->children().at(0)->installEventFilter(this);
+    connect(m_spDepth, SIGNAL(valueChanged(int)), gigFileObj, SLOT(setEG3Depth(int)));
+
 
     m_dsbFrequency = new QDoubleSpinBox(this);
     m_dsbFrequency->setMaximum(10.00);
@@ -46,7 +102,9 @@ PitchSettingsForm::PitchSettingsForm(QWidget *parent) :
     m_dsbFrequency->setDecimals(2);
     m_dsbFrequency->setAlignment(Qt::AlignHCenter);
     m_dsbFrequency->installEventFilter(this);
+    if (pDimensionRegion!=nullptr) m_dsbFrequency->setValue(pDimensionRegion->LFO3Frequency);
     m_dsbFrequency->children().at(0)->installEventFilter(this);
+    connect(m_dsbFrequency, SIGNAL(valueChanged(double)), gigFileObj, SLOT(setLFO3Frequency(double)));
 
     m_sbInternalDepth = new QSpinBox(this);
     m_sbInternalDepth->setMaximum(1200);
@@ -54,13 +112,18 @@ PitchSettingsForm::PitchSettingsForm(QWidget *parent) :
     m_sbInternalDepth->setAlignment(Qt::AlignHCenter);
     m_sbInternalDepth->installEventFilter(this);
     m_sbInternalDepth->children().at(0)->installEventFilter(this);
+    if (pDimensionRegion!=nullptr) m_sbInternalDepth->setValue(pDimensionRegion->LFO3InternalDepth);
+    connect(m_sbInternalDepth, SIGNAL(valueChanged(int)), gigFileObj, SLOT(setLFO3InternalDepth(int)));
 
     m_sbControlDepth = new QSpinBox(this);
     m_sbControlDepth->setMaximum(1200);
     m_sbControlDepth->setMinimum(0);
     m_sbControlDepth->setAlignment(Qt::AlignHCenter);
     m_sbControlDepth->installEventFilter(this);
+    if (pDimensionRegion!=nullptr) m_sbControlDepth->setValue(pDimensionRegion->LFO3ControlDepth);
     m_sbControlDepth->children().at(0)->installEventFilter(this);
+    connect(m_sbControlDepth, SIGNAL(valueChanged(int)), gigFileObj, SLOT(setLFO3ControlDepth(int)));
+
 
     m_cbController = new QComboBox(this);
     m_cbController->addItem("Internal");
@@ -68,10 +131,15 @@ PitchSettingsForm::PitchSettingsForm(QWidget *parent) :
     m_cbController->addItem("AfterTouch");
     m_cbController->addItem("Internal+Modwheel");
     m_cbController->addItem("Internal+Aftertouch");
+
     m_cbController->installEventFilter(this);
+    if (pDimensionRegion!=nullptr)  m_cbController->setCurrentIndex(pDimensionRegion->LFO3Controller);
+    connect(m_cbController, SIGNAL(currentIndexChanged(int)), gigFileObj, SLOT(setLFO3Controller(int)));
 
     m_ckbSync = new QCheckBox(this);
     m_ckbSync->installEventFilter(this);
+    if (pDimensionRegion!=nullptr) m_ckbSync->setChecked(pDimensionRegion->LFO3Sync);
+    connect(m_ckbSync, SIGNAL(stateChanged(int)), gigFileObj, SLOT(setLFO3Sync(int)));
 
     // add widgets to table widget
     ui->twPitchSettings->verticalHeader()->setSectionResizeMode(QHeaderView::Fixed);

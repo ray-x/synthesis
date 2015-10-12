@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>800</width>
+    <height>480</height>
+   </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>800</width>
+    <height>480</height>
+   </size>
+  </property>
+  <property name="maximumSize">
+   <size>
+    <width>800</width>
+    <height>480</height>
+   </size>
+  </property>
+  <property name="windowTitle">
+   <string>Synthetizer</string>
+  </property>
+  <property name="styleSheet">
+   <string notr="true">#PresetBank{
+	background-color:qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, stop:0 rgba(22, 68, 115, 255), stop:1 rgba(21, 51, 83, 255))
+}
+
+QLabel{
+	color:white;
+}
+
+#label{
+	background-color:rgb(21, 68, 26);
+	color: white;
+}
+
+#lbBank1{
+	background-color:rgb(131, 15, 29);
+	color: white
+}
+
+#lbBank2{
+	background-color : rgb(131, 15, 29);
+	color : white
+}
+
+#lbKey{
+	background-color : transparent;
+	color : white
+}
+
+#lbOctave{
+	background-color : transparent;
+	color : white
+}
+
+#lbCategory{
+	background-color : rgb(131, 15, 29);
+	color: white
+}
+
+#lbCatNb{
+	background-color : rgb(131, 15, 29);
+	color: white
+}
+
+#lbCatName{
+	background-color : transparent;
+	color: white;
+}
+
+#lbSelect_1{
+	background-color : rgb(21, 68, 26);
+}
+
+#lbSelect_2{
+	background-color : rgb(21, 68, 26);
+}
+
+#lbSelect_3{
+	background-color : rgb(21, 68, 26);
+}
+
+#lbSelect_4{
+	background-color : rgb(21, 68, 26);
+}
+
+#lbInstrName_1{
+	background-color:qlineargradient(spread:reflect, x1:0, y1:0, x2:0, y2:1, stop:0 rgba(4, 14, 24, 255), stop:0.5 rgba(26, 68, 113, 255), stop:1 rgba(7, 18, 30, 255))
+}
+
+#lbInstrName_2{
+	background-color:qlineargradient(spread:reflect, x1:0, y1:0, x2:0, y2:1, stop:0 rgba(4, 14, 24, 255), stop:0.5 rgba(26, 68, 113, 255), stop:1 rgba(7, 18, 30, 255))
+}
+
+#lbInstrName_3{
+	background-color:qlineargradient(spread:reflect, x1:0, y1:0, x2:0, y2:1, stop:0 rgba(4, 14, 24, 255), stop:0.5 rgba(26, 68, 113, 255), stop:1 rgba(7, 18, 30, 255))
+}
+
+#lbInstrName_4{
+	background-color:qlineargradient(spread:reflect, x1:0, y1:0, x2:0, y2:1, stop:0 rgba(4, 14, 24, 255), stop:0.5 rgba(26, 68, 113, 255), stop:1 rgba(7, 18, 30, 255));
+}
+
+#frame_Select{
+	background-color: rgb(18, 22, 29);
+}
+
+#frame_Eff{
+	background-color: rgb(18, 22, 29);
+}
+
+#lbOpt_SEdit{
+	background-color: rgb(18, 22, 29);
+}
+
+#lbOpt_FEdit{
+	background-color: rgb(18, 22, 29);
+}
+
+#lbOpt_EQ{
+	background-color:rgb(10, 23, 15);
+}
+
+#lbOpt_Eff{
+  background-color:rgb(10, 23, 15);
+}
+
+#lbProg{
+	background-color: qlineargradient(spread:reflect, x1:0, y1:0, x2:0, y2:1, stop:0 rgba(0, 0, 0, 255), stop:0.112403 rgba(14, 38, 63, 255), stop:0.143411 rgba(52, 144, 239, 255), stop:0.162791 rgba(37, 100, 166, 255), stop:0.79845 rgba(38, 100, 165, 255), stop:0.817829 rgba(53, 141, 233, 255), stop:0.848837 rgba(17, 46, 77, 255), stop:1 rgba(0, 0, 0, 255))
+}
+
+#lbEQ_Prog_1{
+	background-color: qlineargradient(spread:reflect, x1:1, y1:1, x2:0, y2:1, stop:0 rgba(0, 0, 0, 255), stop:0.112403 rgba(14, 38, 63, 255), stop:0.143411 rgba(52, 144, 239, 255), stop:0.162791 rgba(37, 100, 166, 255), stop:0.79845 rgba(38, 100, 165, 255), stop:0.817829 rgba(53, 141, 233, 255), stop:0.848837 rgba(17, 46, 77, 255), stop:1 rgba(0, 0, 0, 255))
+}
+
+#lbEQ_Prog_2{
+	background-color: qlineargradient(spread:reflect, x1:1, y1:1, x2:0, y2:1, stop:0 rgba(0, 0, 0, 255), stop:0.112403 rgba(14, 38, 63, 255), stop:0.143411 rgba(52, 144, 239, 255), stop:0.162791 rgba(37, 100, 166, 255), stop:0.79845 rgba(38, 100, 165, 255), stop:0.817829 rgba(53, 141, 233, 255), stop:0.848837 rgba(17, 46, 77, 255), stop:1 rgba(0, 0, 0, 255))
+}
+
+#lbEQ_Prog_3{
+	background-color: qlineargradient(spread:reflect, x1:1, y1:1, x2:0, y2:1, stop:0 rgba(0, 0, 0, 255), stop:0.112403 rgba(14, 38, 63, 255), stop:0.143411 rgba(52, 144, 239, 255), stop:0.162791 rgba(37, 100, 166, 255), stop:0.79845 rgba(38, 100, 165, 255), stop:0.817829 rgba(53, 141, 233, 255), stop:0.848837 rgba(17, 46, 77, 255), stop:1 rgba(0, 0, 0, 255))
+}
+
+#lbEQ_Prog_4{
+	background-color: qlineargradient(spread:reflect, x1:1, y1:1, x2:0, y2:1, stop:0 rgba(0, 0, 0, 255), stop:0.112403 rgba(14, 38, 63, 255), stop:0.143411 rgba(52, 144, 239, 255), stop:0.162791 rgba(37, 100, 166, 255), stop:0.79845 rgba(38, 100, 165, 255), stop:0.817829 rgba(53, 141, 233, 255), stop:0.848837 rgba(17, 46, 77, 255), stop:1 rgba(0, 0, 0, 255))
+}
+
+#lbProg_text{
+	background-color:transparent;
+	border: 0px solid transparent;
+	color:white;
+}</string>
+  </property>
+  <property name="toolButtonStyle">
+   <enum>Qt::ToolButtonTextOnly</enum>
+  </property>
+  <property name="animated">
+   <bool>false</bool>
+  </property>
+  <property name="tabShape">
+   <enum>QTabWidget::Rounded</enum>
+  </property>
+  <widget class="QWidget" name="centralWidget">
+   <layout class="QGridLayout" name="gridLayout">
+    <property name="leftMargin">
+     <number>0</number>
+    </property>
+    <property name="topMargin">
+     <number>0</number>
+    </property>
+    <property name="rightMargin">
+     <number>0</number>
+    </property>
+    <property name="bottomMargin">
+     <number>0</number>
+    </property>
+   </layout>
+  </widget>
+ </widget>
+ <layoutdefault spacing="6" margin="11"/>
+ <resources/>
+ <connections/>
+</ui>

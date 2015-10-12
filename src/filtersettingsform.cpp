@@ -9,11 +9,117 @@
 #include <QMouseEvent>
 #include <QScrollBar>
 
+#include "gigfile.h"
+
+void FilterSettingsForm::show()
+{
+    gigFile *gigFileObj= gigFile::instance();
+
+    gig::File *gigfd=gigFileObj->m_gigO[gigFileObj->idx];
+    gig::DimensionRegion *pDimensionRegion;
+    if (gigfd!=nullptr) {
+        gig::Instrument *pInstrument = gigfd->GetFirstInstrument();
+        gig::Region *pRegion=pInstrument->GetFirstRegion();
+        pDimensionRegion = pRegion->pDimensionRegions[0];
+    }else
+        pDimensionRegion=nullptr;
+
+    int index;
+
+    if (pDimensionRegion==nullptr)
+        goto end;
+
+    //name domain
+
+
+    switch (pDimensionRegion->VCFType) {
+        case gig::vcf_type_lowpass:index=0;break;
+        case gig::vcf_type_lowpassturbo:index=1;break;
+        case gig::vcf_type_bandpass:index=2;break;
+        case gig::vcf_type_highpass:index=3;break;
+        case gig::vcf_type_bandreject:index=4;break;
+    }
+
+    
+    m_cbFilterType->setCurrentIndex(index);
+    
+
+    switch (pDimensionRegion->VCFCutoffController) {
+        case gig::vcf_cutoff_ctrl_none:index=0;break;
+        case gig::vcf_cutoff_ctrl_none2:index=1;break;
+        case gig::vcf_cutoff_ctrl_modwheel:index=2;break;
+        case gig::vcf_cutoff_ctrl_effect1:index=3;break;
+        case gig::vcf_cutoff_ctrl_effect2:index=4;break;
+        case gig::vcf_cutoff_ctrl_breath:index=5;break;
+        case gig::vcf_cutoff_ctrl_foot:index=6;break;
+        case gig::vcf_cutoff_ctrl_sustainpedal:index=7;break;
+        case gig::vcf_cutoff_ctrl_softpedal:index=8;break;
+        case gig::vcf_cutoff_ctrl_genpurpose7:index=9;break;
+        case gig::vcf_cutoff_ctrl_genpurpose8:index=10;break;
+        case gig::vcf_cutoff_ctrl_aftertouch:index=11;break;
+        default: index=0;
+    }
+
+    m_cbCutoffController->setCurrentIndex(index);
+
+    m_ckbCutoffCtrlInvert->setChecked(pDimensionRegion->VCFCutoffControllerInvert);
+    m_sbCutoff->setValue(pDimensionRegion->VCFCutoff);
+
+
+    switch (pDimensionRegion->VCFVelocityCurve) {
+        case gig::curve_type_nonlinear:  index=0;break;
+        case gig::curve_type_linear:     index=1;break;
+        case gig::curve_type_special:    index=2;break;
+        default: index=0;
+    }
+    m_cbVelocityCurve->setCurrentIndex(index);
+    
+
+    m_sbVelocityScale->setValue(pDimensionRegion->VCFVelocityScale);
+    m_sbVelocityDynRange->setValue(pDimensionRegion->VCFVelocityDynamicRange);
+    m_sbResonance->setValue(pDimensionRegion->VCFResonance);
+    m_ckbResonanceDyn->setChecked(pDimensionRegion->VCFResonanceDynamic);
+    m_cbResonanceCtrl->setCurrentIndex(pDimensionRegion->VCFResonanceController);
+    m_ckbKbdTrack->setChecked(pDimensionRegion->VCFKeyboardTracking);
+    m_sbKbdTrackBreakpt->setValue(pDimensionRegion->VCFKeyboardTrackingBreakpoint);
+    m_dsbPreAttackLevel->setValue(pDimensionRegion->EG2PreAttack);
+    m_dspAttackTime->setValue(pDimensionRegion->EG2Attack);
+    m_dspDecayTime1->setValue(pDimensionRegion->EG2Decay1);
+    m_dspDecayTime2->setValue(pDimensionRegion->EG2Decay2);
+    m_ckbInfiniteSustain->setChecked(pDimensionRegion->EG2InfiniteSustain);
+    m_dspSustainLevel->setValue(pDimensionRegion->EG2Sustain);
+    m_dspReleaseTime->setValue(pDimensionRegion->EG2Release);
+    m_ckbControllerInvert->setChecked(pDimensionRegion->EG2ControllerInvert);
+    m_sbCtrlAttackInfluence->setValue(pDimensionRegion->EG2ControllerAttackInfluence);
+    m_sbCtrlDecayInfluence->setValue(pDimensionRegion->EG2ControllerAttackInfluence);
+    m_sbCtrlReleaseInfluence->setValue(pDimensionRegion->EG2ControllerReleaseInfluence);
+    m_dsbFrequency->setValue(pDimensionRegion->LFO2Frequency);
+    m_sbInternalDepth->setValue(pDimensionRegion->LFO2InternalDepth);
+    m_sbControlDepth->setValue(pDimensionRegion->LFO2ControlDepth);
+    m_cbLFOController->setCurrentIndex(pDimensionRegion->LFO2Controller);
+    m_ckbFlipPhase->setChecked(pDimensionRegion->LFO2FlipPhase);
+    m_ckbSync->setChecked(pDimensionRegion->LFO2Sync);
+end:
+    QWidget::show();
+}
+
 FilterSettingsForm::FilterSettingsForm(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::FilterSettingsForm)
 {
     ui->setupUi(this);
+
+    gigFile *gigFileObj= gigFile::instance();
+
+    gig::File *gigfd=gigFileObj->m_gigO[gigFileObj->idx];
+    gig::DimensionRegion *pDimensionRegion;
+    if (gigfd!=nullptr) {
+        gig::Instrument *pInstrument = gigfd->GetFirstInstrument();
+        gig::Region *pRegion=pInstrument->GetFirstRegion();
+        pDimensionRegion = pRegion->pDimensionRegions[gigFileObj->idx];
+    }else
+        pDimensionRegion=nullptr;
+    //pDimensionRegion = nullptr;// pRegion->pDimensionRegions[0];
 
     // Create the widgets to be put in table widget
     m_cbFilterType = new QComboBox(this);
@@ -23,6 +129,27 @@ FilterSettingsForm::FilterSettingsForm(QWidget *parent) :
     m_cbFilterType->addItem("highpass");
     m_cbFilterType->addItem("bandreject");
     m_cbFilterType->installEventFilter(this);
+    //FIXME: 
+    //if (pDimensionRegion!=nullptr) m_cbFilterType->setCurrentIndex(pDimensionRegion->VCFType);
+     if (pDimensionRegion!=nullptr)
+     {
+
+        int index;
+        switch (pDimensionRegion->VCFType) {
+            case gig::vcf_type_lowpass:index=0;break;
+            case gig::vcf_type_lowpassturbo:index=1;break;
+            case gig::vcf_type_bandpass:index=2;break;
+            case gig::vcf_type_highpass:index=3;break;
+            case gig::vcf_type_bandreject:index=4;break;
+        }
+        m_cbFilterType->setCurrentIndex(index);
+     }
+    connect(m_cbFilterType,SIGNAL(currentIndexChanged(int)), gigFileObj, SLOT(setVCFType(int)));
+
+    /*
+    if (pDimensionRegion!=nullptr) m_cbFilterType->setCurrentIndex(pDimensionRegion->VCFEnabled);
+    connect(m_sbControlDepth,SIGNAL(currentIndexChanged(int)), gigFileObj, SLOT(setLVCFEnabled(int)));
+    */
 
     m_cbCutoffController = new QComboBox(this);
     m_cbCutoffController->addItem("none");
@@ -38,9 +165,34 @@ FilterSettingsForm::FilterSettingsForm(QWidget *parent) :
     m_cbCutoffController->addItem("genpurpose8");
     m_cbCutoffController->addItem("aftertouch");
     m_cbCutoffController->installEventFilter(this);
+    //FIXME:
+    //m_cbCutoffController->setCurrentIndex(pDimensionRegion->SetVCFCutoffController);
+    /*if (pDimensionRegion!=nullptr){
+                switch (pDimensionRegion->VCFCutoffController) {
+                    case gig::vcf_cutoff_ctrl_none:index=0;break;
+                    case gig::vcf_cutoff_ctrl_none2:index=1;break;
+                    case gig::vcf_cutoff_ctrl_modwheel:index=2;break;
+                    case gig::vcf_cutoff_ctrl_effect1:index=3;break;
+                    case gig::vcf_cutoff_ctrl_effect2:index=4;break;
+                    case gig::vcf_cutoff_ctrl_breath:index=5;break;
+                    case gig::vcf_cutoff_ctrl_foot:index=6;break;
+                    case gig::vcf_cutoff_ctrl_sustainpedal:index=7;break;
+                    case gig::vcf_cutoff_ctrl_softpedal:index=8;break;
+                    case gig::vcf_cutoff_ctrl_genpurpose7:index=9;break;
+                    case gig::vcf_cutoff_ctrl_genpurpose8:index=10;break;
+                    case gig::vcf_cutoff_ctrl_aftertouch:index=11;break;
+                    default: index=0;
+                }
+        m_cbCutoffController->setCurrentIndex(index);
+    }*/
+    m_cbCutoffController->setCurrentIndex(0);
+    
+    connect(m_cbCutoffController, SIGNAL(currentIndexChanged(int)), gigFileObj, SLOT(setCutoffControllerf(int)));
 
     m_ckbCutoffCtrlInvert = new QCheckBox(this);
     m_ckbCutoffCtrlInvert->installEventFilter(this);
+    if (pDimensionRegion!=nullptr) m_ckbCutoffCtrlInvert->setChecked(pDimensionRegion->VCFCutoffControllerInvert);
+    connect(m_ckbCutoffCtrlInvert, SIGNAL(stateChanged(int)), gigFileObj, SLOT(setVCFCutoffControllerInvert(int)));
 
     m_sbCutoff = new QSpinBox(this);
     m_sbCutoff->setMaximum(127);
@@ -48,12 +200,27 @@ FilterSettingsForm::FilterSettingsForm(QWidget *parent) :
     m_sbCutoff->setAlignment(Qt::AlignHCenter);
     m_sbCutoff->installEventFilter(this);
     m_sbCutoff->children().at(0)->installEventFilter(this);
+    if (pDimensionRegion!=nullptr) m_sbCutoff->setValue(pDimensionRegion->VCFCutoff);
+    connect(m_sbCutoff, SIGNAL(valueChanged(int)), gigFileObj, SLOT(setVCFCutoff(int)));
 
     m_cbVelocityCurve = new QComboBox(this);
     m_cbVelocityCurve->addItem("nonlinear");
     m_cbVelocityCurve->addItem("linear");
     m_cbVelocityCurve->addItem("special");
-    m_cbVelocityCurve->installEventFilter(this);
+
+
+
+    /*if (pDimensionRegion!=nullptr) {
+        switch (pDimensionRegion->VCFVelocityCurve) {
+            case gig::curve_type_nonlinear:  index=0;break;
+            case gig::curve_type_linear:     index=1;break;
+            case gig::curve_type_special:    index=2;break;
+            default: index=0;
+        }
+        m_cbVelocityCurve->setCurrentIndex(index);
+    }*/
+    m_cbVelocityCurve->setCurrentIndex(0);
+    connect(m_cbVelocityCurve, SIGNAL(currentIndexChanged(int)), gigFileObj, SLOT(setVCFVelocityCurve(int)));
 
     m_sbVelocityScale = new QSpinBox(this);
     m_sbVelocityScale->setMaximum(127);
@@ -61,6 +228,9 @@ FilterSettingsForm::FilterSettingsForm(QWidget *parent) :
     m_sbVelocityScale->setAlignment(Qt::AlignHCenter);
     m_sbVelocityScale->installEventFilter(this);
     m_sbVelocityScale->children().at(0)->installEventFilter(this);
+    if (pDimensionRegion!=nullptr) m_sbVelocityScale->setValue(pDimensionRegion->VCFVelocityScale);
+    connect(m_sbVelocityScale, SIGNAL(valueChanged(int)), gigFileObj, SLOT(setVCFVelocityScale(int)));
+
 
     m_sbVelocityDynRange = new QSpinBox(this);
     m_sbVelocityDynRange->setMaximum(4);
@@ -68,6 +238,8 @@ FilterSettingsForm::FilterSettingsForm(QWidget *parent) :
     m_sbVelocityDynRange->setAlignment(Qt::AlignHCenter);
     m_sbVelocityDynRange->installEventFilter(this);
     m_sbVelocityDynRange->children().at(0)->installEventFilter(this);
+    if (pDimensionRegion!=nullptr) m_sbVelocityDynRange->setValue(pDimensionRegion->VCFVelocityDynamicRange);
+    connect(m_sbVelocityDynRange, SIGNAL(valueChanged(int)), gigFileObj, SLOT(SetVCFVelocityDynamicRangef(int)));
 
     m_sbResonance = new QSpinBox(this);
     m_sbResonance->setMaximum(127);
@@ -75,9 +247,13 @@ FilterSettingsForm::FilterSettingsForm(QWidget *parent) :
     m_sbResonance->setAlignment(Qt::AlignHCenter);
     m_sbResonance->installEventFilter(this);
     m_sbResonance->children().at(0)->installEventFilter(this);
+    if (pDimensionRegion!=nullptr) m_sbResonance->setValue(pDimensionRegion->VCFResonance);
+    connect(m_sbResonance, SIGNAL(valueChanged(int)), gigFileObj, SLOT(setVCFResonance(int)));
 
     m_ckbResonanceDyn = new QCheckBox(this);
     m_ckbResonanceDyn->installEventFilter(this);
+    if (pDimensionRegion!=nullptr) m_ckbResonanceDyn->setChecked(pDimensionRegion->VCFResonanceDynamic);
+    connect(m_ckbResonanceDyn, SIGNAL(stateChanged(int)), gigFileObj, SLOT(setVCFResonanceDynamic(int)));
 
     m_cbResonanceCtrl = new QComboBox(this);
     m_cbResonanceCtrl->addItem("none");
@@ -86,9 +262,15 @@ FilterSettingsForm::FilterSettingsForm(QWidget *parent) :
     m_cbResonanceCtrl->addItem("genpurpose5");
     m_cbResonanceCtrl->addItem("genpurpose6");
     m_cbResonanceCtrl->installEventFilter(this);
+    if (pDimensionRegion!=nullptr) m_cbResonanceCtrl->setCurrentIndex(pDimensionRegion->VCFResonanceController);
+    connect(m_cbResonanceCtrl, SIGNAL(currentIndexChanged(int)), gigFileObj, SLOT(setVCFResonanceController(int)));
+
+
 
     m_ckbKbdTrack = new QCheckBox(this);
     m_ckbKbdTrack->installEventFilter(this);
+    if (pDimensionRegion!=nullptr) m_ckbKbdTrack->setChecked(pDimensionRegion->VCFKeyboardTracking);
+    connect(m_ckbKbdTrack, SIGNAL(stateChanged(int)), gigFileObj, SLOT(setVCFKeyboardTracking(int)));
 
     m_sbKbdTrackBreakpt = new QSpinBox(this);
     m_sbKbdTrackBreakpt->setMaximum(127);
@@ -96,6 +278,8 @@ FilterSettingsForm::FilterSettingsForm(QWidget *parent) :
     m_sbKbdTrackBreakpt->setAlignment(Qt::AlignHCenter);
     m_sbKbdTrackBreakpt->installEventFilter(this);
     m_sbKbdTrackBreakpt->children().at(0)->installEventFilter(this);
+    if (pDimensionRegion!=nullptr) m_sbKbdTrackBreakpt->setValue(pDimensionRegion->VCFKeyboardTrackingBreakpoint);
+    connect(m_sbKbdTrackBreakpt, SIGNAL(valueChanged(int)), gigFileObj, SLOT(setVCFKeyboardTrackBpt(int)));
 
     m_dsbPreAttackLevel = new QDoubleSpinBox(this);
     m_dsbPreAttackLevel->setMaximum(100.00);
@@ -104,6 +288,9 @@ FilterSettingsForm::FilterSettingsForm(QWidget *parent) :
     m_dsbPreAttackLevel->setAlignment(Qt::AlignHCenter);
     m_dsbPreAttackLevel->installEventFilter(this);
     m_dsbPreAttackLevel->children().at(0)->installEventFilter(this);
+    if (pDimensionRegion!=nullptr) m_dsbPreAttackLevel->setValue(pDimensionRegion->EG2PreAttack);
+    connect(m_dsbPreAttackLevel, SIGNAL(valueChanged(double)), gigFileObj, SLOT(setEG2PreAttack(double)));
+
 
     m_dspAttackTime = new QDoubleSpinBox(this);
     m_dspAttackTime->setMaximum(60.000);
@@ -112,6 +299,8 @@ FilterSettingsForm::FilterSettingsForm(QWidget *parent) :
     m_dspAttackTime->setAlignment(Qt::AlignHCenter);
     m_dspAttackTime->installEventFilter(this);
     m_dspAttackTime->children().at(0)->installEventFilter(this);
+    if (pDimensionRegion!=nullptr) m_dspAttackTime->setValue(pDimensionRegion->EG2Attack);
+    connect(m_dspAttackTime, SIGNAL(valueChanged(double)), gigFileObj, SLOT(setEG2Attack(double)));
 
     m_dspDecayTime1 = new QDoubleSpinBox(this);
     m_dspDecayTime1->setMaximum(60.000);
@@ -120,6 +309,8 @@ FilterSettingsForm::FilterSettingsForm(QWidget *parent) :
     m_dspDecayTime1->setAlignment(Qt::AlignHCenter);
     m_dspDecayTime1->installEventFilter(this);
     m_dspDecayTime1->children().at(0)->installEventFilter(this);
+    if (pDimensionRegion!=nullptr) m_dspDecayTime1->setValue(pDimensionRegion->EG2Decay1);
+    connect(m_dspDecayTime1, SIGNAL(valueChanged(double)), gigFileObj, SLOT(setEG2Decay1(double)));
 
     m_dspDecayTime2 = new QDoubleSpinBox(this);
     m_dspDecayTime2->setMaximum(60.000);
@@ -128,9 +319,15 @@ FilterSettingsForm::FilterSettingsForm(QWidget *parent) :
     m_dspDecayTime2->setAlignment(Qt::AlignHCenter);
     m_dspDecayTime2->installEventFilter(this);
     m_dspDecayTime2->children().at(0)->installEventFilter(this);
+    if (pDimensionRegion!=nullptr) m_dspDecayTime2->setValue(pDimensionRegion->EG2Decay2);
+    connect(m_dspDecayTime2, SIGNAL(valueChanged(double)), gigFileObj, SLOT(setEG2Decay2(double)));
+
 
     m_ckbInfiniteSustain = new QCheckBox(this);
     m_ckbInfiniteSustain->installEventFilter(this);
+    if (pDimensionRegion!=nullptr) m_ckbInfiniteSustain->setChecked(pDimensionRegion->EG2InfiniteSustain);
+    connect(m_ckbInfiniteSustain, SIGNAL(stateChanged(int)), gigFileObj, SLOT(setEG2InfiniteSustain(int)));
+
 
     m_dspSustainLevel = new QDoubleSpinBox(this);
     m_dspSustainLevel->setMaximum(100.00);
@@ -139,6 +336,9 @@ FilterSettingsForm::FilterSettingsForm(QWidget *parent) :
     m_dspSustainLevel->setAlignment(Qt::AlignHCenter);
     m_dspSustainLevel->installEventFilter(this);
     m_dspSustainLevel->children().at(0)->installEventFilter(this);
+    if (pDimensionRegion!=nullptr) m_dspSustainLevel->setValue(pDimensionRegion->EG2Sustain);
+    connect(m_dspSustainLevel, SIGNAL(valueChanged(double)), gigFileObj, SLOT(setEG2Sustain(double)));
+
 
     m_dspReleaseTime = new QDoubleSpinBox(this);
     m_dspReleaseTime->setMaximum(60.000);
@@ -147,6 +347,8 @@ FilterSettingsForm::FilterSettingsForm(QWidget *parent) :
     m_dspReleaseTime->setAlignment(Qt::AlignHCenter);
     m_dspReleaseTime->installEventFilter(this);
     m_dspReleaseTime->children().at(0)->installEventFilter(this);
+    if (pDimensionRegion!=nullptr) m_dspReleaseTime->setValue(pDimensionRegion->EG2Release);
+    connect(m_dspReleaseTime, SIGNAL(valueChanged(double)), gigFileObj, SLOT(setEG2Release(double)));
 
     m_cbEGController = new QComboBox(this);
     m_cbEGController->addItem("None");
@@ -165,6 +367,9 @@ FilterSettingsForm::FilterSettingsForm(QWidget *parent) :
 
     m_ckbControllerInvert = new QCheckBox(this);
     m_ckbControllerInvert->installEventFilter(this);
+    if (pDimensionRegion!=nullptr) m_ckbControllerInvert->setChecked(pDimensionRegion->EG2ControllerInvert);
+    connect(m_ckbControllerInvert, SIGNAL(stateChanged(int)), gigFileObj, SLOT(setEG2ControllerInvert(int)));
+
 
     m_sbCtrlAttackInfluence = new QSpinBox(this);
     m_sbCtrlAttackInfluence->setMaximum(3);
@@ -172,6 +377,8 @@ FilterSettingsForm::FilterSettingsForm(QWidget *parent) :
     m_sbCtrlAttackInfluence->setAlignment(Qt::AlignHCenter);
     m_sbCtrlAttackInfluence->installEventFilter(this);
     m_sbCtrlAttackInfluence->children().at(0)->installEventFilter(this);
+    if (pDimensionRegion!=nullptr) m_sbCtrlAttackInfluence->setValue(pDimensionRegion->EG2ControllerAttackInfluence);
+    connect(m_sbCtrlAttackInfluence, SIGNAL(valueChanged(int)), gigFileObj, SLOT(setEG2ControllerAttackInfluence(int)));
 
     m_sbCtrlDecayInfluence = new QSpinBox(this);
     m_sbCtrlDecayInfluence->setMaximum(3);
@@ -179,6 +386,8 @@ FilterSettingsForm::FilterSettingsForm(QWidget *parent) :
     m_sbCtrlDecayInfluence->setAlignment(Qt::AlignHCenter);
     m_sbCtrlDecayInfluence->installEventFilter(this);
     m_sbCtrlDecayInfluence->children().at(0)->installEventFilter(this);
+    if (pDimensionRegion!=nullptr) m_sbCtrlDecayInfluence->setValue(pDimensionRegion->EG2ControllerAttackInfluence);
+    connect(m_sbCtrlAttackInfluence, SIGNAL(valueChanged(int)), gigFileObj, SLOT(setEG2ControllerAttackInfluence(int)));
 
     m_sbCtrlReleaseInfluence = new QSpinBox(this);
     m_sbCtrlReleaseInfluence->setMaximum(3);
@@ -186,6 +395,8 @@ FilterSettingsForm::FilterSettingsForm(QWidget *parent) :
     m_sbCtrlReleaseInfluence->setAlignment(Qt::AlignHCenter);
     m_sbCtrlReleaseInfluence->installEventFilter(this);
     m_sbCtrlReleaseInfluence->children().at(0)->installEventFilter(this);
+    if (pDimensionRegion!=nullptr) m_sbCtrlReleaseInfluence->setValue(pDimensionRegion->EG2ControllerReleaseInfluence);
+    connect(m_sbCtrlReleaseInfluence, SIGNAL(valueChanged(int)), gigFileObj, SLOT(setEG2ControllerReleaseInfluence(int)));
 
     m_dsbFrequency = new QDoubleSpinBox(this);
     m_dsbFrequency->setMaximum(10.00);
@@ -194,6 +405,8 @@ FilterSettingsForm::FilterSettingsForm(QWidget *parent) :
     m_dsbFrequency->setAlignment(Qt::AlignHCenter);
     m_dsbFrequency->installEventFilter(this);
     m_dsbFrequency->children().at(0)->installEventFilter(this);
+    if (pDimensionRegion!=nullptr) m_dsbFrequency->setValue(pDimensionRegion->LFO2Frequency);
+    connect(m_dsbFrequency, SIGNAL(valueChanged(double)), gigFileObj, SLOT(setLFO2Frequency(double)));
 
     m_sbInternalDepth = new QSpinBox(this);
     m_sbInternalDepth->setMaximum(1200);
@@ -201,6 +414,8 @@ FilterSettingsForm::FilterSettingsForm(QWidget *parent) :
     m_sbInternalDepth->setAlignment(Qt::AlignHCenter);
     m_sbInternalDepth->installEventFilter(this);
     m_sbInternalDepth->children().at(0)->installEventFilter(this);
+    if (pDimensionRegion!=nullptr) m_sbInternalDepth->setValue(pDimensionRegion->LFO2InternalDepth);
+    connect(m_sbInternalDepth, SIGNAL(valueChanged(int)), gigFileObj, SLOT(setLFO2InternalDepth(int)));
 
     m_sbControlDepth = new QSpinBox(this);
     m_sbControlDepth->setMaximum(1200);
@@ -208,6 +423,8 @@ FilterSettingsForm::FilterSettingsForm(QWidget *parent) :
     m_sbControlDepth->setAlignment(Qt::AlignHCenter);
     m_sbControlDepth->installEventFilter(this);
     m_sbControlDepth->children().at(0)->installEventFilter(this);
+    if (pDimensionRegion!=nullptr) m_sbControlDepth->setValue(pDimensionRegion->LFO2ControlDepth);
+    connect(m_sbControlDepth, SIGNAL(valueChanged(int)), gigFileObj, SLOT(setLFO2ControlDepth(int)));
 
     m_cbLFOController = new QComboBox(this);
     m_cbLFOController->addItem("Internal");
@@ -216,12 +433,18 @@ FilterSettingsForm::FilterSettingsForm(QWidget *parent) :
     m_cbLFOController->addItem("Internal+Modwheel");
     m_cbLFOController->addItem("Internal+Aftertouch");
     m_cbLFOController->installEventFilter(this);
+    if (pDimensionRegion!=nullptr) m_cbLFOController->setCurrentIndex(pDimensionRegion->LFO2Controller);
+    connect(m_cbLFOController, SIGNAL(currentIndexChanged(int)), gigFileObj, SLOT(setLFO2Controller(int)));
 
     m_ckbFlipPhase = new QCheckBox(this);
     m_ckbFlipPhase->installEventFilter(this);
+    if (pDimensionRegion!=nullptr) m_ckbFlipPhase->setChecked(pDimensionRegion->LFO2FlipPhase);
+    connect(m_ckbFlipPhase, SIGNAL(stateChanged(int)), gigFileObj, SLOT(setLFO2FlipPhase(int)));
 
     m_ckbSync = new QCheckBox(this);
     m_ckbSync->installEventFilter(this);
+    if (pDimensionRegion!=nullptr) m_ckbSync->setChecked(pDimensionRegion->LFO2Sync);
+    connect(m_ckbSync, SIGNAL(stateChanged(int)), gigFileObj, SLOT(setLFO2Sync(int)));
 
     // add widgets to table widget
     ui->twTypeController->verticalHeader()->setSectionResizeMode(QHeaderView::Fixed);

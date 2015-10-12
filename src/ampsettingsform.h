@@ -24,6 +24,7 @@ public:
 
     bool eventFilter(QObject *obj, QEvent *event);
 
+
 private:
     Ui::AmpSettingsForm *ui;
 
@@ -61,7 +62,8 @@ private:
     bool                isTabClicked;
 
     int getRow(QTableWidget *tw, QObject *obj);
-
+public slots:
+    void show();
 private slots:
 //    void connectTables(int currentRow, int currentColumn, int previousRow, int previousColumn);
 

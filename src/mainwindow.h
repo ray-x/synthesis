@@ -19,11 +19,10 @@
 #include "effectsroutingform.h"
 
 #include "gig.h"
-
+#include"gigfile.h"
 #include <map>
 #include <utility>
 #include <string>
-
 
 namespace Ui {
 class MainWindow;
@@ -38,7 +37,10 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
     void GetInstruments();
-    void GetFileInformations() ;
+    void GetFileInformations();
+    void initMultiSampleList();
+    gig::File *m_gig;
+    gigFile m_gigObj;
 private:
     Ui::MainWindow *ui;
 
@@ -56,28 +58,14 @@ private:
     CategoriesForm      *m_categoriesForm;
     SoundEditForm       *m_soundEditForm;
     EffectsRoutingForm  *m_effectRoutingForm;
-#ifdef __linux__
-    gig::File *m_gig;
-    QList<gig::Sample*> m_sampleList;
-    // QList<gig::Instrument*> m_instrumentList;
-    std::map<std::string, gig::Instrument*> m_instrumentList;
-    QList<gig::Region *> m_regionList;
-    QList<gig::DimensionRegion *> m_dimensionRegionList;
-    QList<gig::Group*> m_groupList;
 
-
-    void initMultiSampleList();
 protected:
     bool keypres(QKeyEvent *keyevent);
-    void GetDimensionRegions(gig::Region* rgn);
-    void GetRegions(gig::Instrument* instr);
-    void GetGroups();
-    void GetSamples() ;
+
 
 public slots:
     void loadInstrProperties(int instrIndex);
 
-#endif
 };
 
 #endif // MAINWINDOW_H

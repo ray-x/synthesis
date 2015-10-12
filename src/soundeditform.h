@@ -2,6 +2,7 @@
 #define SOUNDEDITFORM_H
 
 #include <QWidget>
+#include <QtWidgets/QLabel>
 #include "ampsettingsform.h"
 #include "filtersettingsform.h"
 #include "pitchsettingsform.h"
@@ -18,21 +19,19 @@ class SoundEditForm : public QWidget
 public:
     explicit SoundEditForm(QWidget *parent = 0);
     ~SoundEditForm();
-
     bool eventFilter(QObject *obj, QEvent *event);
+    int ui_tab;
 
 private:
     Ui::SoundEditForm *ui;
-
+    QLabel *lbSampleName[4];
     AmpSettingsForm     *m_ampSettingsForm;
     FilterSettingsForm  *m_filterSettingsForm;
     PitchSettingsForm   *m_pitchSettingsForm;
     MiscSettingsForm    *m_miscSettingsFrom;
 
-    bool                m_sampleEnabled1;
-    bool                m_sampleEnabled2;
-    bool                m_sampleEnabled3;
-    bool                m_sampleEnabled4;
+    bool                m_sampleEnabled[4];
+    void showEdit();
 
     void clearSelectedSample();
 
@@ -42,6 +41,8 @@ public slots:
     void selectSample2();
     void selectSample3();
     void selectSample4();
+    void show();
+signals:
 
 private slots:
 

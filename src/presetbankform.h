@@ -25,6 +25,8 @@ public:
 
 
     QPushButton *sampleButtonClicked() const;
+    QPushButton *pbSample[4];
+    QPushButton *pbSampleEdit[4];
 
 private:
     Ui::PresetBankForm *ui;

@@ -22,7 +22,8 @@ public:
     ~PitchSettingsForm();
 
     bool eventFilter(QObject *obj, QEvent *event);
-
+public slots:
+    void show();
 private:
     Ui::PitchSettingsForm *ui;
 

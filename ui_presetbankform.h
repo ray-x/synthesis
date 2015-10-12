@@ -1408,19 +1408,19 @@ public:
         lbSection3->setText(QApplication::translate("PresetBankForm", "MULTISAMPLES", 0));
         lbSampleNb1->setText(QApplication::translate("PresetBankForm", "1", 0));
         chkSampleEnable1->setText(QString());
-        pbSample1->setText(QApplication::translate("PresetBankForm", "001: White Grand Piano", 0));
+        pbSample1->setText(QApplication::translate("PresetBankForm", "NONE", 0));
         pbSampleEdit1->setText(QApplication::translate("PresetBankForm", "EDIT", 0));
         lbSampleNb2->setText(QApplication::translate("PresetBankForm", "2", 0));
         chkSampleEnable2->setText(QString());
-        pbSample2->setText(QApplication::translate("PresetBankForm", "002: Platino Strings", 0));
+        pbSample2->setText(QApplication::translate("PresetBankForm", "NONE", 0));
         pbSampleEdit2->setText(QApplication::translate("PresetBankForm", "EDIT", 0));
         lbSampleNb3->setText(QApplication::translate("PresetBankForm", "3", 0));
         chkSampleEnable3->setText(QString());
-        pbSample3->setText(QApplication::translate("PresetBankForm", "001: String Ensemble", 0));
+        pbSample3->setText(QApplication::translate("PresetBankForm", "NONE", 0));
         pbSampleEdit3->setText(QApplication::translate("PresetBankForm", "EDIT", 0));
         lbSampleNb4->setText(QApplication::translate("PresetBankForm", "4", 0));
         chkSampleEnable4->setText(QString());
-        pbSample4->setText(QApplication::translate("PresetBankForm", "009: Analog Wave", 0));
+        pbSample4->setText(QApplication::translate("PresetBankForm", "NONE", 0));
         pbSampleEdit4->setText(QApplication::translate("PresetBankForm", "EDIT", 0));
         lbSection2->setText(QApplication::translate("PresetBankForm", "ENVELOPE", 0));
     } // retranslateUi
