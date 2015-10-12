@@ -210,8 +210,8 @@ void SoundEditForm::showEdit()
     case 3:
         m_ampSettingsForm->hide();
         m_filterSettingsForm->hide();
-        m_pitchSettingsForm->show();
-        m_miscSettingsFrom->hide();
+        m_pitchSettingsForm->hide();
+        m_miscSettingsFrom->show();
         break;
     }
 }
