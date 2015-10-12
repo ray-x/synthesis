@@ -1,0 +1,141 @@
+
+QWidget{
+font-weight                   : 550;  
+color                                : white;
+font-family:                    "Open Sans";
+font-size                          : 13pt;
+}
+
+QComboBox{
+selection-background-color: rgb(239, 159, 31);
+color                                            : white;
+padding                                      : 1px 0px 1px 3px;
+background-color                   :  rgb(16, 97, 114);
+}
+
+QComboBox QListView{
+background-color                    : rgb(16, 97, 114);
+}
+
+QComboBox:!editable  {
+width :200px;
+padding-right                             : 5px;
+}
+
+QSpinBox{
+background-color        :   rgb(16, 97, 114);
+padding-left : 5px;
+}
+QSpinBox::up-button {
+     width: 0px; 
+     border-width: 0px;
+}
+QSpinBox::down-button {
+     width: 0px; 
+     border-width: 0px;
+}
+
+QDoubleSpinBox{
+background-color        :   rgb(16, 97, 114);
+padding-left : 5px;
+}
+QDoubleSpinBox::up-button {
+     width: 0px; 
+     border-width: 0px;
+}
+QDoubleSpinBox::down-button {
+     width: 0px; 
+     border-width: 0px;
+}
+
+QCheckBox{
+background-color        :   rgb(216, 146, 1);
+width: 30px;
+
+padding-left: 3px;
+margin-left : 24px;
+margin-right : 20px;
+margin-top: 10px;
+margin-bottom: 10px;
+
+}
+
+QCheckBox::indicator { 
+width:33px; 
+height: 15px; 
+}
+
+ QCheckBox::indicator:unchecked {
+   background-color : white;
+ }
+
+ QCheckBox::indicator:checked {
+   background-color : rgb(84, 189, 58);
+ }
+
+QCheckBox:focus { 
+     border:none;
+	 color:transparent;
+   }
+
+QTableView{
+background-color: transparent;
+selection-background-color:gb(239, 159, 31);
+}
+
+QTableView::item {
+    color                                :   white;  
+    font-weight                   : 550;
+    background-color        :   rgb(16, 97, 114);
+}
+
+QTableWidget::item:selected{background-color: rgb(239, 159, 31);}
+
+QHeaderView{
+	background-color: transparent;
+}
+
+QHeaderView::section:vertical{
+    background-color        :  rgb(16, 97, 114);
+    color                                 :  white;
+    font-size                          : 12pt;
+	font-weight                    :  550;
+    padding-left                   : 5px;
+    padding-top                   : 0px;
+    padding-bottom           : 0px;
+    width                                : 280px;
+    font-family                      : "Open Sans";
+}
+
+
+QHeaderView::section:checked{background-color: rgb(239, 159, 31);}
+
+
+QScrollBar:vertical {
+    border                  :   1px solid black;
+    background              :   black;
+    width                   :   20px;
+    margin                  :   0 0 0 0px;
+}
+
+QScrollBar::handle:vertical {
+    background              :   rgb(16, 97, 114);
+    min-height              :   20px;
+    margin: 0px 1px 0px 1px;
+}
+
+
+QScrollBar::add-line:vertical,QScrollBar::sub-line:vertical  {
+    border                  :   none;
+    background              :   transparent;
+    height                  :   0px;
+    margin                  :   0 0 0 10px;
+}
+
+QScrollBar::up-arrow:vertical, QScrollBar::down-arrow:vertical {
+    border                  :   none;
+    width                   :   0px;
+    height                  :   0px;
+    background              :   white;
+    margin                  :   0 0 0 10px;
+}

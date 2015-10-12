@@ -1,0 +1,21 @@
+<RCC>
+    <qresource prefix="/">
+        <file>font/OpenSans/OpenSans-ExtraBoldItalic.ttf</file>
+        <file>font/OpenSans/OpenSans-ExtraBold.ttf</file>
+        <file>font/OpenSans/OpenSans-BoldItalic.ttf</file>
+        <file>font/OpenSans/OpenSans-Bold.ttf</file>
+        <file>font/OpenSans/OpenSans-SemiboldItalic.ttf</file>
+        <file>font/OpenSans/OpenSans-Semibold.ttf</file>
+        <file>font/OpenSans/OpenSans-Italic.ttf</file>
+        <file>font/OpenSans/OpenSans-Regular.ttf</file>
+        <file>font/OpenSans/OpenSans-LightItalic.ttf</file>
+        <file>font/OpenSans/OpenSans-Light.ttf</file>
+        <file>images/Envelope.jpg</file>
+        <file>qss/buttons.qss</file>
+        <file>qss/buttonSample.qss</file>
+        <file>qss/tablewidgetcb.qss</file>
+        <file>qss/tablewidgetdefault.qss</file>
+        <file>qss/tablewidgetdefaultlong.qss</file>
+        <file>qss/stylesheet.qss</file>
+    </qresource>
+</RCC>
