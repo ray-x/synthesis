@@ -1,0 +1,40 @@
+# Exported by: JSampler - a java front-end for LinuxSampler
+# Version: 0.9cvs2
+# Date: Thu Oct 15 23:35:13 EDT 2015
+
+RESET
+
+SET VOLUME 0.55
+
+CREATE MIDI_INPUT_DEVICE ALSA NAME='LinuxSampler'
+SET MIDI_INPUT_PORT_PARAMETER 0 0 NAME='Port 0'
+SET MIDI_INPUT_PORT_PARAMETER 0 0 ALSA_SEQ_BINDINGS=NONE
+
+CREATE AUDIO_OUTPUT_DEVICE ALSA ACTIVE=true CHANNELS=2 SAMPLERATE=44100 CARD='0,0' FRAGMENTS=2 FRAGMENTSIZE=128
+SET AUDIO_OUTPUT_CHANNEL_PARAMETER 0 0 NAME='Channel 0'
+SET AUDIO_OUTPUT_CHANNEL_PARAMETER 0 1 NAME='Channel 1'
+
+REMOVE MIDI_INSTRUMENT_MAP ALL
+
+ADD CHANNEL
+SET CHANNEL MIDI_INPUT_DEVICE 0 0
+SET CHANNEL MIDI_INPUT_PORT 0 0
+SET CHANNEL MIDI_INPUT_CHANNEL 0 0
+LOAD ENGINE GIG 0
+SET CHANNEL VOLUME 0 1.0
+SET CHANNEL MIDI_INSTRUMENT_MAP 0 NONE
+SET CHANNEL AUDIO_OUTPUT_DEVICE 0 0
+LOAD INSTRUMENT NON_MODAL '/home/fabesis/Sythesis/gigfiles/CGM4LS.gig' 0 0
+
+
+#jsampler.fantasia: [channel]
+#jsampler.fantasia: channelLane = 1
+#jsampler.fantasia: viewType = NORMAL
+#jsampler.fantasia: expanded = false
+#
+#jsampler.fantasia: [MIDI device]
+#jsampler.fantasia: expanded = false
+#
+#jsampler.fantasia: [audio device]
+#jsampler.fantasia: expanded = true
+#
