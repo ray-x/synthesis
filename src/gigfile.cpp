@@ -5,6 +5,8 @@
 #include<sstream>
 using namespace std;
 #include <algorithm>
+#include <QTcpSocket>
+#include <QMessageBox>
 gigFile::gigFile(QObject *parent) :
     QObject(parent)
 {
@@ -516,6 +518,8 @@ void gigFile::createNewGigFile(QString&  gigfilename)
         //gig->Save(IN_GIG_FILE_NAME);
         m_gigO[idx]->Save(outfile.str().c_str());
 
+
+
         delete gig;
         delete riff;
     }catch (RIFF::Exception e) {
@@ -531,6 +535,32 @@ void gigFile::newGigFile(QString  gigfilename) {
     instName=gigfilename.toStdString();
    instName.erase(std::remove_if(instName.begin(), instName.end(), [](char n){ return n == ':'; }), instName.end());
     createNewGigFile(gigfilename);
+    reloadGig(m);
+}
+void gigFile::reloadGig(int ch)
+{
+    QTcpSocket *tcpSocket = new QTcpSocket();
+
+    tcpSocket->connectToHost("127.0.0.1", 8888,QIODevice::ReadWrite);
+    if (! tcpSocket->waitForConnected()) {
+          printf("writeLine: the write to the socket failed\n");
+        }
+
+    QString cmd=QString("LOAD INSTRUMENT NON_MODAL '/home/ray/projects/audio/gigfiles/%1.gig' 0 %2\r\n").arg(ch).arg(ch);
+    int len=tcpSocket->write(cmd.toLatin1());
+    tcpSocket->waitForBytesWritten();
+    QString recvline;
+    bool suc=false;
+    while(tcpSocket->canReadLine())
+    {
+        recvline = QString::fromUtf8(tcpSocket->readLine()).trimmed();
+        qDebug() << recvline;
+        if(recvline.contains(QString("OK")))
+            suc=true;
+    }
+    //tcpSocket->abort();
+    //if (!suc)
+    //    QMessageBox::warning(NULL, "warning", "reload gig file failed", QMessageBox::Yes | QMessageBox::No, QMessageBox::Yes);
 }
 
 #define SET_GIG(a,b)  do {\

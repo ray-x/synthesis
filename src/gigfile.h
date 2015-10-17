@@ -66,6 +66,7 @@ public:
 signals:
 
 public slots:
+    void reloadGig(int);
     void newGigFile(QString);
     void setGain(double);
     void setGain6db(int);

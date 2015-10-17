@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui
+QT       += core gui network
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -110,7 +110,7 @@ RESOURCES += \
 unix{
 INCLUDEPATH += /usr/include/libgig
 LIBS += -L/usr/lib/libgig \
-        -lgig
+        -lgig  -L/usr/lib/python2.7 -lpython2.7
 }
 CONFIG +=
 QMAKE_CXXFLAGS += -std=c++11 -DQT_FATAL_WARNINGS=1
