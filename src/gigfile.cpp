@@ -267,10 +267,6 @@ void gigFile::GetDimensionRegions(gig::Region* rgn) {
             }
             cout << pSample->SamplesPerSecond << "Hz, ";
             cout << "UnityNote=" << (int) pDimensionRegion->UnityNote << ", FineTune=" << (int) pDimensionRegion->FineTune << ", Gain=" << (-pDimensionRegion->Gain / 655360.0) << "dB, SampleStartOffset=" << pDimensionRegion->SampleStartOffset << endl;
-            if (i%5==0) {
-                pDimensionRegion->SetGain(-13.333);
-                pDimensionRegion->LFO3Frequency=32.0;
-            }
         }
         else {
             cout << "                Sample: <NO_VALID_SAMPLE_REFERENCE> " << endl;
